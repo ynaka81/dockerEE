@@ -1,0 +1,20 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "opscode-centos-7.1"
+  config.vm.synced_folder "..", "/vagrant"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+    # add /dev/sdb
+    disk_file = "./disk.vdi"
+    unless File.exist?(disk_file) then
+      vb.customize ["createhd", "--filename", disk_file, "--size", 10 * 1024]
+      vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", disk_file]
+    end
+  end
+  # ansible provision
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "provision/site.yml"
+  end
+end

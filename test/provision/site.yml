@@ -1,0 +1,51 @@
+---
+- hosts: all
+  sudo: yes
+  remote_user: vagrant
+  roles:
+          - { role: geerlingguy.git }
+          - { role: ynaka81.fabric,
+              fabric_warn_only: False }
+  handlers:
+          - name: restart docker
+            service: name=docker enabled=yes state=restarted
+  tasks:
+          - name: install option python packages
+            pip: name={{ item }} state=latest
+            with_items:
+                    - ipaddress
+
+          - name: install precondition packages for docker lvm
+            yum: name=device-mapper-event-libs state=latest
+
+          - name: install docker
+            yum: name=docker state=latest
+            notify: restart docker
+
+          - name: stop docker
+            service: name=docker enabled=yes state=stopped
+
+          - name: configure docker-storage-setup
+            copy: src=docker-storage-setup dest=/usr/lib/docker-storage-setup/docker-storage-setup
+
+          - name: start docker
+            service: name=docker enabled=yes state=started
+
+          - name: install brctl
+            yum: name=bridge-utils state=latest
+
+          - name: get pipework source
+            git: repo=https://github.com/jpetazzo/pipework.git dest=/usr/local/src/pipework
+
+          - name: install pipework
+            file: src=/usr/local/src/pipework/pipework dest=/usr/local/bin/pipework state=link
+
+          - name: copy Dockerfile
+            copy: src=Dockerfile dest=/tmp
+            register: dockerfile
+
+          - name: build Dockerfile
+            shell: docker build -t local/centos .
+            args:
+                    chdir: /tmp
+            when: dockerfile.changed
