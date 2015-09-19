@@ -43,7 +43,7 @@ class TestContainerManagerImpl(unittest.TestCase):
         ## remote interface
         self.__interface = RemoteInterfaceImpl(host, user, password)
         ## container_manager
-        self.__manager = ContainerManagerImpl("localhost", "vagrant", "vagrant")
+        self.__manager = ContainerManagerImpl(host, user, password)
         ## test utils
         self.__utils = DockerContainerTestUtils(host, user, password)
     ## test ContainerManagerImpl.createContainer(name)
@@ -107,11 +107,13 @@ class TestContainerManagerImpl(unittest.TestCase):
         lines = ret.stdout.splitlines()
         self.assertIn(image, lines[1].split())
     ## test ContainerManagerImpl.command(name, command)
+    # @param self The object pointer
     def testCommand(self):
         container = "c1"
         self.__manager.createContainer(container)
         ret = self.__manager.command(container, "uname -n")
         self.assertEqual(ret.stdout, container)
+        self.__manager.destroyContainer(container)
 
     ## test ContainerManagerImpl.__init__(host, user, password) fail because of docker service not running
     # @param self The object pointer
@@ -157,6 +159,7 @@ class TestContainerManagerImpl(unittest.TestCase):
         self.__manager.createContainer(container)
         with self.assertRaises(RuntimeError):
             ret = self.__manager.command(container, "fail")
+        self.__manager.destroyContainer(container)
 
 if __name__ == "__main__":
     unittest.main()
