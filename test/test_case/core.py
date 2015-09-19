@@ -150,6 +150,13 @@ class TestContainerManagerImpl(unittest.TestCase):
             self.__manager.destroyContainer(container)
         self.__interface.sudo("service docker start")
         self.__manager.destroyContainer(container)
+    ## test ContainerManagerImpl.command(name, command) fail because the command does not exist
+    # @param self The object pointer
+    def testFailCommand(self):
+        container = "c1"
+        self.__manager.createContainer(container)
+        with self.assertRaises(RuntimeError):
+            ret = self.__manager.command(container, "fail")
 
 if __name__ == "__main__":
     unittest.main()
