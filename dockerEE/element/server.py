@@ -13,3 +13,9 @@ class Server(object):
     # @param self The object pointer
     def getName(self):
         return self.__container.getName()
+    ## execute command on server
+    # @param self The object pointer
+    # @param command The command to execute on server
+    # @return CommandResult
+    def command(self, command):
+        return self.__container.command(command)

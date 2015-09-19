@@ -30,6 +30,12 @@ class TestServer(unittest.TestCase):
         self.assertTrue(self.__utils.checkContainerExist(servers))
         del s[:]
         self.assertFalse(self.__utils.checkContainerExist(servers))
+    ## test Server.command(command)
+    def testCommand(self):
+        server = "s1"
+        s1 = Server(self.__manager, server)
+        ret = s1.command("uname -n")
+        self.assertEqual(ret.stdout, server)
 
 if __name__ == "__main__":
     unittest.main()
