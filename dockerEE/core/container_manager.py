@@ -23,6 +23,12 @@ class Container(object):
     # @param self The object pointer
     def getName(self):
         return self.__name
+    ## execute command on container
+    # @param self The object pointer
+    # @param command The command to execute on container
+    # @return CommandResult
+    def command(self, command):
+        return self.__manager.command(self.__name, command)
 
 ## ContainerManager
 #
@@ -41,6 +47,14 @@ class ContainerManager(object):
     # @param name The name of container
     @abstractmethod
     def destroyContainer(self, name):
+        pass
+    ## abstractmethod of executing command on container
+    # @param self The object pointer
+    # @param name The name of container
+    # @param command The command to execute on container
+    # @return CommandResult
+    @abstractmethod
+    def command(self, name, command):
         pass
     ## create container
     # @param self The object pointer

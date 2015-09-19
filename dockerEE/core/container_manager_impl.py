@@ -22,6 +22,12 @@ class ContainerManagerImpl(ContainerManager):
         # destroy the containers still running
         for h in self.__host_name:
             self.destroyContainer(h)
+    ## check whether the container exists
+    # @param self The object pointer
+    # @param name The name of container
+    def __checkContainerExist(self, name):
+        if name not in self.__host_name:
+            raise ValueError("The host name(" + name + ") is not running yet.")
     ## create container
     # @param self The object pointer
     # @param name The name of container
@@ -48,11 +54,22 @@ class ContainerManagerImpl(ContainerManager):
     # @param self The object pointer
     # @param name The name of container
     def destroyContainer(self, name):
-        if name not in self.__host_name:
-            raise ValueError("The host name(" + name + ") is not running yet.")
+        self.__checkContainerExist(name)
         # destroy the container
         ret = self.__interface.sudo("docker rm -f " + name, True)
         if ret.rc != 0:
             raise RuntimeError("Cannot destroy container(" + name + "): " + ret.stderr)
         # delete from host name list
         self.__host_name.remove(name)
+    ## execute command on container
+    # @param self The object pointer
+    # @param name The name of container
+    # @param command The command to execute on container
+    # @return CommandResult
+    def command(self, name, command):
+        self.__checkContainerExist(name)
+        # execute command on container
+        ret = self.__interface.sudo("docker exec -it " + name + " " + command, True)
+        if ret.rc != 0:
+            raise RuntimeError("Failed to execute command(\"" + command + "\") on container(" + name + "): " + ret.stderr)
+        return ret

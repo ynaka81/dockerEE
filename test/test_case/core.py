@@ -24,6 +24,12 @@ class TestContainer(unittest.TestCase):
         c1 = self.__manager.create(container)
         del c1
         self.assertFalse(self.__utils.checkContainerExist(container))
+    ## test Container.command(command)
+    def testCommand(self):
+        container = "c1"
+        c1 = self.__manager.create(container)
+        ret = c1.command("uname -n")
+        self.assertEqual(ret.stdout, container)
 
 ## TestContainerManagerInmpl
 #
@@ -100,6 +106,12 @@ class TestContainerManagerImpl(unittest.TestCase):
         ret = self.__interface.sudo("docker ps -a")
         lines = ret.stdout.splitlines()
         self.assertIn(image, lines[1].split())
+    ## test ContainerManagerImpl.command(name, command)
+    def testCommand(self):
+        container = "c1"
+        self.__manager.createContainer(container)
+        ret = self.__manager.command(container, "uname -n")
+        self.assertEqual(ret.stdout, container)
 
     ## test ContainerManagerImpl.__init__(host, user, password) fail because of docker service not running
     # @param self The object pointer
