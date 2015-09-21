@@ -24,7 +24,8 @@ class TestServerLoader(unittest.TestCase):
         servers = ServerLoader()(self.__manager, parameter)
         for p in parameter:
             self.assertTrue(p["name"] in servers)
-            self.assertEqual(servers[p["name"]].command("uname -n").stdout, p["name"])
+            ret = servers[p["name"]].command("uname -n")
+            self.assertEqual(ret.stdout, p["name"])
 
 if __name__ == "__main__":
     unittest.main()

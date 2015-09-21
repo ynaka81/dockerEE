@@ -11,7 +11,10 @@ class RemoteInterfaceImpl(RemoteInterface):
     # @param host The host to connect
     # @param user The login user
     # @param password The login password
-    def __init__(self, host=None, user=None, password=None):
+    # @param pty Whether pty is used or not
+    def __init__(self, host=None, user=None, password=None, pty=True):
+        ## pty option
+        self.__pty = pty
         # set target info to fabric
         fabric.api.env.host_string = host
         fabric.api.env.user = user
@@ -33,5 +36,5 @@ class RemoteInterfaceImpl(RemoteInterface):
         else:
             settings_parameter = {}
         with settings(hide(*hide_parameter), **settings_parameter):
-            ret = fabric.api.sudo(command, pty=False)
+            ret = fabric.api.sudo(command, pty=self.__pty)
         return CommandResult(ret.command, ret.return_code, ret.stdout, ret.stderr)

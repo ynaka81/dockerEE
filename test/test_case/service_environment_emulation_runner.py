@@ -18,7 +18,7 @@ class TestEnvironmentEmulationRunner(unittest.TestCase):
     # @param self The object pointer
     def setUp(self):
         ## remote interface
-        self.__interface = RemoteInterfaceImpl("localhost", "vagrant", "vagrant")
+        self.__interface = RemoteInterfaceImpl("localhost", "vagrant", "vagrant", pty=False)
         ## stub file
         self.__stub = "service_environment_emulation_runner_stub.py"
     ## test "python service.py"
