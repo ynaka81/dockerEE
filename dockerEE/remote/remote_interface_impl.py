@@ -33,5 +33,5 @@ class RemoteInterfaceImpl(RemoteInterface):
         else:
             settings_parameter = {}
         with settings(hide(*hide_parameter), **settings_parameter):
-            ret = fabric.api.sudo(command)
+            ret = fabric.api.sudo(command, pty=False)
         return CommandResult(ret.command, ret.return_code, ret.stdout, ret.stderr)
