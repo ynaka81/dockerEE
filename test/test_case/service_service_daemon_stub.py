@@ -21,12 +21,12 @@ class TestService(ServiceDaemon):
     # @param self The object pointer
     def _initApp(self):
         self.__counter = 0
-    ## get counter
+    ## exposed method of getting counter
     # @param self The object pointer
     # @return counter
     def getCount(self):
         return self.__counter
-    ## count up counter
+    ## exposed method of counting up counter
     # @param self The object pointer
     def countUp(self):
         self.__counter += 1
