@@ -56,6 +56,24 @@ class TestEnvironmentEmulationService(unittest.TestCase):
         ret = self.__execStub("stop")
         time.sleep(10)
         self.assertTrue(self.__utils.checkContainerNotExist(servers))
+    ## test "python service.py status"
+    # @param self The object pointer
+    def testStatus(self):
+        servers = [x["name"] for x in self.__parameter["servers"]]
+        self.__execStub("start /tmp/env.yml")
+        time.sleep(10)
+        ret = self.__execStub("status")
+        status =  "servers\n"
+        status += "\tc2\n"
+        status += "\tc1"
+        self.assertIn(status, ret.stdout)
+        self.__execStub("stop")
+        time.sleep(10)
+    ## test "python service.py reload"
+    # @param self The object pointer
+    def testReload(self):
+        # TODO:implement Server.reload()
+        pass
 
 if __name__ == "__main__":
     unittest.main()
