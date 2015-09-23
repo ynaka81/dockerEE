@@ -1,0 +1,71 @@
+import os
+import select
+import re
+import Pyro4.core
+import Pyro4.naming
+from  Pyro4 import socketutil
+
+## ServiceDaemon
+#
+# The service daemon that provide service interface
+class ServiceDaemon(object):
+    ## constructor
+    # @param pidfile The PID filename
+    def __init__(self, pidfile):
+        # init service parameter
+        self.stdin_path = self.stdout_path = self.stderr_path = "/dev/null"
+        self.pidfile_timeout = 10
+        pidfile = os.path.expanduser(pidfile)
+        directory = os.path.dirname(pidfile)
+        if not os.path.isdir(directory):
+            os.mkdir(directory)
+        self.pidfile_path = pidfile
+        # expose service name
+        self.__service_name = str(self.__class__.__name__)
+    ## the virtual method of application specific initialization before service loop
+    # @param self The object pointer
+    def _initApp(self):
+        pass
+    ## the implementation of running application
+    # @param self The object pointer
+    def run(self):
+        # application specific initialization
+        self._initApp()
+        # prepare service connection
+        uri, name_server, broadcast_server = Pyro4.naming.startNS(host=socketutil.getIpAddress(None, workaround127=True))
+        daemon = Pyro4.core.Daemon()
+        service_uri = daemon.register(self)
+        name_server.nameserver.register(self.__service_name, service_uri)
+        # service connection waiting loop
+        while True:
+            try:
+                # create waiting sockets
+                name_server_sockets = set(name_server.sockets)
+                daemon_sockets = set(daemon.sockets)
+                rs = [broadcast_server]
+                rs.extend(name_server_sockets)
+                rs.extend(daemon_sockets)
+                rs, _, _ = select.select(rs, [], [], 3)
+                # socket processes
+                name_server_events = []
+                daemon_events = []
+                for s in rs:
+                    if s is broadcast_server:
+                        broadcast_server.processRequest()
+                    elif s in name_server_sockets:
+                        name_server_events.append(s)
+                    elif s in daemon_sockets:
+                        daemon_events.append(s)
+                if name_server_events:
+                    name_server.events(name_server_events)
+                if daemon_events:
+                    daemon.events(daemon_events)
+            # unregister myself when service daemon exit
+            except SystemExit:
+                daemon.unregister(self)
+                raise
+    ## get myself
+    # @param self The object pointer
+    # @return my object pointer
+    def _getInstance(self):
+        return Pyro4.core.Proxy("PYRONAME:" + self.__service_name)
