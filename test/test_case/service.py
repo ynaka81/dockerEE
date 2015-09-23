@@ -55,8 +55,7 @@ class TestEnvironmentEmulationService(unittest.TestCase):
         self.assertTrue(self.__utils.checkContainerExist(servers))
         ret = self.__execStub("stop")
         time.sleep(10)
-        for s in servers:
-            self.assertFalse(self.__utils.checkContainerExist(s))
+        self.assertTrue(self.__utils.checkContainerNotExist(servers))
 
 if __name__ == "__main__":
     unittest.main()
