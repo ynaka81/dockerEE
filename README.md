@@ -26,7 +26,7 @@ Usage
 -----
 To start emulation environment defined by demo/hello_dockerEE/env.yml,
 
-    $ python main.py start env.yml
+    $ python main.py start demo/hello_dockerEE/env.yml
 
 After starting environment, you can get the status,
 
