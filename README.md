@@ -21,6 +21,7 @@ dockerEE depends on the following packages.
 - [Pyro4](https://github.com/irmen/Pyro4)
 - [PyYAML](https://github.com/yaml/pyyaml)
 - [fabric](https://github.com/fabric/fabric)
+- [ipaddress](http://docs.python.jp/3/library/ipaddress.html)
 
 Usage
 -----
