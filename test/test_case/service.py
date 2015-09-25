@@ -69,6 +69,8 @@ class TestEnvironmentEmulationService(unittest.TestCase):
         self.assertIn(status, ret.stdout)
         self.__execStub("stop")
         time.sleep(10)
+        ret = self.__execStub("status")
+        self.assertEqual(ret.rc, 0)
     ## test "python service.py reload"
     # @param self The object pointer
     def testReload(self):

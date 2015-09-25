@@ -31,6 +31,7 @@ class TestEnvironmentEmulationRunner(unittest.TestCase):
     def testStatus(self):
         ret = self.__execStub("status")
         self.assertIn("Active: inactive (dead)", ret.stdout)
+        self.assertNotIn("App Specific:", ret.stdout)
         ret = self.__execStub("start")
         ret = self.__execStub("status")
         self.assertIn("Active: active (running)", ret.stdout)
@@ -38,6 +39,7 @@ class TestEnvironmentEmulationRunner(unittest.TestCase):
         ret = self.__execStub("stop")
         ret = self.__execStub("status")
         self.assertIn("Active: inactive (dead)", ret.stdout)
+        self.assertNotIn("App Specific:", ret.stdout)
     ## test "python service.py reload"
     # @param self The object pointer
     def testReload(self):
