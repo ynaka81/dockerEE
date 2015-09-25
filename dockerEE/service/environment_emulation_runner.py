@@ -4,7 +4,15 @@ from daemon import runner
 #
 # The extension of python-daemon.runner for additional actions
 class EnvironmentEmulationRunner(runner.DaemonRunner):
-    __status = {"active": "active (running)", "fail": "failed", "inactive": "inactive (dead)"}
+    ## constructor
+    # @param The daemon application
+    def __init__(self, app):
+        runner.DaemonRunner.__init__(self, app)
+        ## status messages
+        self.__status = {"active": "active (running)", "fail": "failed", "inactive": "inactive (dead)"}
+        # add runner.DaemonRunner.files_preserve if app has files_preserve
+        if hasattr(app, "files_preserve"):
+            self.daemon_context.files_preserve = app.files_preserve
     ## display status
     # @param self The object pointer
     def _status(self):
