@@ -22,10 +22,13 @@ class TestServiceDaemon(unittest.TestCase):
         self.__interface = RemoteInterfaceImpl("localhost", "vagrant", "vagrant", pty=False)
         ## stub file
         self.__stub = "service_service_daemon_stub.py"
+        ## starting file name
+        self.__filename = "/tmp/service_service_daemon"
+        open(self.__filename, "w")
     ## test "python service.py start/stop"
     # @param self The object pointer
     def testStartStop(self):
-        ret = self.__execStub("start /tmp/env.yml")
+        ret = self.__execStub("start " + self.__filename)
         self.assertEqual(ret.rc, 0)
         ret = self.__interface.sudo("test -f ~/.dockerEE/test_service_service_daemon.check", True)
         self.assertEqual(ret.rc, 0)
@@ -37,7 +40,7 @@ class TestServiceDaemon(unittest.TestCase):
     ## test ServiceDaemon._getInstance(self)
     # @param self The object pointer
     def testGetInstance(self):
-        self.__execStub("start /tmp/env.yml")
+        self.__execStub("start " + self.__filename)
         time.sleep(1)
         service = TestService()
         self.assertEqual(service._getInstance().getCount(), 0)
@@ -45,7 +48,7 @@ class TestServiceDaemon(unittest.TestCase):
     ## test "python service.py status"
     # @param self The object pointer
     def testStatus(self):
-        self.__execStub("start /tmp/env.yml")
+        self.__execStub("start " + self.__filename)
         time.sleep(1)
         ret = self.__execStub("status")
         self.assertIn("counter = 0", ret.stdout)
@@ -53,7 +56,7 @@ class TestServiceDaemon(unittest.TestCase):
     ## test "python service.py reload"
     # @param self The object pointer
     def testReload(self):
-        self.__execStub("start /tmp/env.yml")
+        self.__execStub("start " + self.__filename)
         time.sleep(1)
         ret = self.__execStub("reload")
         time.sleep(1)

@@ -1,3 +1,5 @@
+import sys
+import os
 from daemon import runner
 
 ## EnvironmentEmulationRunner
@@ -13,6 +15,32 @@ class EnvironmentEmulationRunner(runner.DaemonRunner):
         # add runner.DaemonRunner.files_preserve if app has files_preserve
         if hasattr(app, "files_preserve"):
             self.daemon_context.files_preserve = app.files_preserve
+    ## additional argument parsing
+    # @param self The object pointer
+    def parse_args(self):
+        runner.DaemonRunner.parse_args(self)
+        # when action is "start", check if the 3rd argument is a file
+        if self.action == "start":
+            if len(sys.argv) != 3:
+                self._usage_exit(sys.argv)
+            if not os.path.isfile(sys.argv[2]):
+                message = u"The 3rd argument (" + sys.argv[2] + ") is not a file.\n"
+                runner.emit_message(message)
+                self._usage_exit(sys.argv)
+    ## additional usage
+    # @param self The object pointer
+    # @param argv The arguments
+    def _usage_exit(self, argv):
+        try:
+            runner.DaemonRunner._usage_exit(self, argv)
+        # add usage message before sys.exit
+        except SystemExit:
+            message = u"\n"
+            message += u"options:\n"
+            message += u"   env.file\tWhen the action is start, the argument represents the environment definition file name.\n"
+            message += u"   server\tWhen the action is reload, the argument represents the server name to reload."
+            runner.emit_message(message)
+            raise
     ## display status
     # @param self The object pointer
     def _status(self):
