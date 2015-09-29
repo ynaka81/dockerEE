@@ -19,3 +19,7 @@ class Server(object):
     # @return CommandResult
     def command(self, command):
         return self.__container.command(command)
+    ## reload myself
+    # @param self The object pointer
+    def reload(self):
+        self.__container.reload()

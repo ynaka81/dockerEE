@@ -13,6 +13,8 @@ class Container(object):
         self.__name = name
         ## container manager
         self.__manager = manager
+        ## container create options
+        self.__options = options
         # create myself
         self.__manager.createContainer(self.__name, **options)
     ## destructor
@@ -29,6 +31,12 @@ class Container(object):
     # @return CommandResult
     def command(self, command):
         return self.__manager.command(self.__name, command)
+    ## reload myself
+    # @param self The object pointer
+    def reload(self):
+        # delete and create container
+        self.__manager.destroyContainer(self.__name)
+        self.__manager.createContainer(self.__name, **self.__options)
 
 ## ContainerManager
 #
