@@ -14,15 +14,17 @@ class TestEnvironmentEmulationService(unittest.TestCase):
     # @param action The action
     # @return CommandResult
     def __execStub(self, action):
-        return self.__interface.sudo("python " + self.__stub + " " + action, True)
+        return self.__service_interface.sudo("python " + self.__stub + " " + action, True)
     ## init test case
     # @param self The object pointer
     def setUp(self):
         host = "localhost"
         user = "vagrant"
         password = "vagrant"
+        ## service interface
+        self.__service_interface = RemoteInterfaceImpl(host, user, password, pty=False)
         ## remote interface
-        self.__interface = RemoteInterfaceImpl(host, user, password, pty=False)
+        self.__interface = RemoteInterfaceImpl(host, user, password)
         ## stub file
         self.__stub = "/tmp/service_stub.py"
         ## env.yml parameter
@@ -74,8 +76,21 @@ class TestEnvironmentEmulationService(unittest.TestCase):
     ## test "python service.py reload"
     # @param self The object pointer
     def testReload(self):
-        # TODO:implement Server.reload()
-        pass
+        servers = [x["name"] for x in self.__parameter["servers"]]
+        self.__execStub("start /tmp/env.yml")
+        time.sleep(10)
+        for s in servers:
+            self.__interface.sudo("docker exec -it " + s + " touch /tmp/hello_dockerEE")
+        for s in servers:
+            ret = self.__interface.sudo("docker exec -it " + s + " test -f /tmp/hello_dockerEE", True)
+            self.assertEqual(ret.rc, 0)
+        ret = self.__execStub("reload " + servers[1])
+        ret = self.__interface.sudo("docker exec -it " + servers[0] + " test -f /tmp/hello_dockerEE", True)
+        self.assertEqual(ret.rc, 0)
+        ret = self.__interface.sudo("docker exec -it " + servers[1] + " test -f /tmp/hello_dockerEE", True)
+        self.assertEqual(ret.rc, 1)
+        self.__execStub("stop")
+        time.sleep(10)
 
 if __name__ == "__main__":
     unittest.main()
