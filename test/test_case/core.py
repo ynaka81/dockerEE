@@ -14,8 +14,6 @@ class TestContainer(unittest.TestCase):
         host = "localhost"
         user = "vagrant"
         password = "vagrant"
-        ## remote interface
-        self.__interface = RemoteInterfaceImpl(host, user, password)
         ## container_manager
         self.__manager = ContainerManagerImpl(host, user, password)
         ## test utils
@@ -32,24 +30,6 @@ class TestContainer(unittest.TestCase):
         c1 = self.__manager.create(container)
         ret = c1.command("uname -n")
         self.assertEqual(ret.stdout, container)
-    ## test Container.reload(self)
-    def testReload(self):
-        c1 = self.__manager.create("c1")
-        ret = c1.command("touch /tmp/hello_dockerEE")
-        self.assertEqual(ret.rc, 0)
-        ret = c1.command("test -f /tmp/hello_dockerEE")
-        self.assertEqual(ret.rc, 0)
-        c1.reload()
-        with self.assertRaises(RuntimeError):
-            ret = c1.command("test -f /tmp/hello_dockerEE")
-    ## test Container.reload(self, options)
-    def testReloadOptions(self):
-        image = "centos:6"
-        c1 = self.__manager.create("c1", image=image)
-        c1.reload()
-        ret = self.__interface.sudo("docker ps -a")
-        lines = ret.stdout.splitlines()
-        self.assertIn(image, lines[1].split())
 
 ## TestContainerManagerInmpl
 #

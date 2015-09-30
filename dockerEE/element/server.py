@@ -21,5 +21,10 @@ class Server(object):
         return self.__container.command(command)
     ## reload myself
     # @param self The object pointer
-    def reload(self):
-        self.__container.reload()
+    # @param manager The container manager
+    def reload(self, manager):
+        # delete and create container
+        name = self.getName()
+        options = self.__container.getOptions()
+        del self.__container
+        self.__container = manager.create(name, **options)

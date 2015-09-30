@@ -2,6 +2,7 @@ import unittest
 import sys
 sys.path.append("../../")
 from dockerEE.element import *
+from dockerEE.remote import RemoteInterfaceImpl
 from dockerEE.core import ContainerManagerImpl
 from docker_container_test_utils import DockerContainerTestUtils
 
@@ -14,6 +15,8 @@ class TestServer(unittest.TestCase):
         host = "localhost"
         user = "vagrant"
         password = "vagrant"
+        ## remote interface
+        self.__interface = RemoteInterfaceImpl(host, user, password)
         ## container manager
         self.__manager = ContainerManagerImpl(host, user, password)
         ## test utils
@@ -36,6 +39,24 @@ class TestServer(unittest.TestCase):
         s1 = Server(self.__manager, server)
         ret = s1.command("uname -n")
         self.assertEqual(ret.stdout, server)
+    ## test Server.reload(self)
+    def testReload(self):
+        s1 = Server(self.__manager, "s1")
+        ret = s1.command("touch /tmp/hello_dockerEE")
+        self.assertEqual(ret.rc, 0)
+        ret = s1.command("test -f /tmp/hello_dockerEE")
+        self.assertEqual(ret.rc, 0)
+        s1.reload(self.__manager)
+        with self.assertRaises(RuntimeError):
+            ret = s1.command("test -f /tmp/hello_dockerEE")
+    ## test Server.reload(self, options)
+    def testReloadOptions(self):
+        image = "centos:6"
+        s1 = Server(self.__manager, "s1", source=image)
+        s1.reload(self.__manager)
+        ret = self.__interface.sudo("docker ps -a")
+        lines = ret.stdout.splitlines()
+        self.assertIn(image, lines[1].split())
 
 if __name__ == "__main__":
     unittest.main()

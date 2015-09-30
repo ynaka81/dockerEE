@@ -25,18 +25,17 @@ class Container(object):
     # @param self The object pointer
     def getName(self):
         return self.__name
+    ## get container options
+    # @param self The object pointer
+    # @return container options
+    def getOptions(self):
+        return self.__options
     ## execute command on container
     # @param self The object pointer
     # @param command The command to execute on container
     # @return CommandResult
     def command(self, command):
         return self.__manager.command(self.__name, command)
-    ## reload myself
-    # @param self The object pointer
-    def reload(self):
-        # delete and create container
-        self.__manager.destroyContainer(self.__name)
-        self.__manager.createContainer(self.__name, **self.__options)
 
 ## ContainerManager
 #
