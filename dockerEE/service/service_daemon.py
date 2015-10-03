@@ -4,12 +4,15 @@ import re
 import logging
 import Pyro4.core
 import Pyro4.naming
+from Pyro4.errors import NamingError
 from  Pyro4 import socketutil
 
 ## ServiceDaemon
 #
 # The service daemon that provide service interface
 class ServiceDaemon(object):
+    ## max name server retry
+    __retry = 10
     ## constructor
     # @param pidfile The PID filename
     def __init__(self, pidfile):
@@ -76,8 +79,20 @@ class ServiceDaemon(object):
                     raise
         except Exception, e:
             self.__exception.exception(e)
+    ## check if myself is running
+    # @param self The object pointer
+    def ping(self):
+        pass
     ## get myself
     # @param self The object pointer
     # @return my object pointer
     def _getInstance(self):
-        return Pyro4.core.Proxy("PYRONAME:" + self.__service_name)
+        instance = Pyro4.core.Proxy("PYRONAME:" + self.__service_name)
+        # check if myself is running
+        for i in range(self.__retry):
+            try:
+                instance.ping()
+                return instance
+            except NamingError as e:
+                continue
+        raise e

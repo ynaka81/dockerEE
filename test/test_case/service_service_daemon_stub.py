@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../../dockerEE/service")
+sys.path.append("/vagrant/dockerEE/service")
 import os
 import time
 from environment_emulation_runner import EnvironmentEmulationRunner

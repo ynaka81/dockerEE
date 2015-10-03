@@ -48,15 +48,18 @@ class EnvironmentEmulationServiceDaemon(ServiceDaemon):
     # @param self The object pointer
     # @return The status message
     def getStatus(self):
-        items = self._getInstance().getItemStatus()
-        status = "loaded items\n"
-        for k1, v1 in items.items():
-            status += k1 + "\n"
-            for k2, v2 in v1.items():
-                status += "\t" + k2 + "\n"
-                for k3, v3 in v2.items():
-                    status += "\t\t" + k3 + ":" + v3 + "\n"
-        return status
+        try:
+            items = self._getInstance().getItemStatus()
+            status = "loaded items\n"
+            for k1, v1 in items.items():
+                status += k1 + "\n"
+                for k2, v2 in v1.items():
+                    status += "\t" + k2 + "\n"
+                    for k3, v3 in v2.items():
+                        status += "\t\t" + k3 + ":" + v3 + "\n"
+            return status
+        except Exception:
+            return "inactive"
     ## the implementation of reloading
     # @param self The object pointer
     def reload(self):
