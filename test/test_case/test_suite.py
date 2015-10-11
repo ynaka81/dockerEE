@@ -2,6 +2,7 @@ import unittest
 # test target list
 from remote import *
 from core import *
+from host import *
 from element import *
 from loader import *
 from parser import *
