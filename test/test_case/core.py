@@ -1,5 +1,7 @@
 import unittest
 import sys
+from ipaddress import ip_interface
+import re
 sys.path.append("../../")
 from dockerEE.remote import RemoteInterfaceImpl
 from dockerEE.core import ContainerManagerImpl
@@ -16,6 +18,8 @@ class TestContainer(unittest.TestCase):
         password = "vagrant"
         ## container_manager
         self.__manager = ContainerManagerImpl(host, user, password)
+        ## remote interface
+        self.__interface = RemoteInterfaceImpl(host, user, password)
         ## test utils
         self.__utils = DockerContainerTestUtils(host, user, password)
     ## test Container.__del__(self)
@@ -30,6 +34,29 @@ class TestContainer(unittest.TestCase):
         c1 = self.__manager.create(container)
         ret = c1.command("uname -n")
         self.assertEqual(ret.stdout, container)
+    ## test Container.attachIP(segment, dev, IP, gw)
+    # @param self The object pointer
+    def testAttachIP(self):
+        bridge = "br1"
+        self.__interface.sudo("brctl addbr " + bridge)
+        self.__interface.sudo("ip link set " + bridge + " up")
+        container = "c1"
+        c1 = self.__manager.create(container)
+        ip1 = ip_interface(u"192.168.0.1/24")
+        dev1 = "eth0"
+        c1.attachIP(bridge, dev1, ip1)
+        ret = c1.command("ip addr show")
+        self.assertTrue(re.search(r"inet " + str(ip1) + ".*" + dev1, ret.stdout))
+        ip2 = ip_interface(u"192.168.1.1/24")
+        dev2 = "eth1"
+        gw = ip_interface(u"192.168.1.254/24")
+        c1.attachIP(bridge, dev2, ip2, gw)
+        ret = c1.command("ip addr show")
+        self.assertTrue(re.search(r"inet " + str(ip2) + ".*" + dev2, ret.stdout))
+        ret = c1.command("ip route show")
+        self.assertIn("default via " + str(gw.ip) + " dev " + dev2, ret.stdout)
+        self.__interface.sudo("ip link set " + bridge + " down")
+        self.__interface.sudo("brctl delbr " + bridge)
 
 ## TestContainerManagerInmpl
 #
@@ -113,6 +140,30 @@ class TestContainerManagerImpl(unittest.TestCase):
         self.__manager.createContainer(container)
         ret = self.__manager.command(container, "uname -n")
         self.assertEqual(ret.stdout, container)
+        self.__manager.destroyContainer(container)
+    ## test ContainerManagerImpl.attachIP(name, segment, dev, IP, gw)
+    # @param self The object pointer
+    def testAttachIP(self):
+        bridge = "br1"
+        self.__interface.sudo("brctl addbr " + bridge)
+        self.__interface.sudo("ip link set " + bridge + " up")
+        container = "c1"
+        self.__manager.createContainer(container)
+        ip1 = ip_interface(u"192.168.0.1/24")
+        dev1 = "eth0"
+        self.__manager.attachIP(container, bridge, dev1, ip1, None)
+        ret = self.__manager.command(container, "ip addr show")
+        self.assertTrue(re.search(r"inet " + str(ip1) + ".*" + dev1, ret.stdout))
+        ip2 = ip_interface(u"192.168.1.1/24")
+        dev2 = "eth1"
+        gw = ip_interface(u"192.168.1.254/24")
+        self.__manager.attachIP(container, bridge, dev2, ip2, gw)
+        ret = self.__manager.command(container, "ip addr show")
+        self.assertTrue(re.search(r"inet " + str(ip2) + ".*" + dev2, ret.stdout))
+        ret = self.__manager.command(container, "ip route show")
+        self.assertIn("default via " + str(gw.ip) + " dev " + dev2, ret.stdout)
+        self.__interface.sudo("ip link set " + bridge + " down")
+        self.__interface.sudo("brctl delbr " + bridge)
         self.__manager.destroyContainer(container)
 
     ## test ContainerManagerImpl.__init__(host, user, password) fail because of docker service not running

@@ -73,3 +73,19 @@ class ContainerManagerImpl(ContainerManager):
         if ret.rc != 0:
             raise RuntimeError("Failed to execute command(\"" + command + "\") on container(" + name + "): " + ret.stderr)
         return ret
+    ## attach IP to container
+    # @param self The object pointer
+    # @param name The name of container
+    # @param segment The name of the segment which the IP is attached on
+    # @param dev The device name of container
+    # @param IP The IP attached to the container
+    # @param gw The gateway address if the device is default gateway
+    def attachIP(self, name, segment, dev, IP, gw):
+        self.__checkContainerExist(name)
+        # execute pipework to attach IP to container
+        cmd = "/usr/local/bin/pipework " + segment + " -i " + dev + " " + name + " " + str(IP)
+        if gw:
+            cmd += "@" + str(gw.ip)
+        ret = self.__interface.sudo(cmd, True)
+        if ret.rc != 0:
+            raise RuntimeError("Failed to attach IP(" + str(IP) + ") to the container(" + name + "): " + ret.stdout + ret.stderr)

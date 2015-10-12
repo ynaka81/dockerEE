@@ -36,6 +36,14 @@ class Container(object):
     # @return CommandResult
     def command(self, command):
         return self.__manager.command(self.__name, command)
+    ## attach IP to container
+    # @param self The object pointer
+    # @param segment The name of the segment which the IP is attached on
+    # @param dev The device name of container
+    # @param IP The IP attached to the container
+    # @param gw The gateway address if the device is default gateway
+    def attachIP(self, segment, dev, IP, gw=None):
+        self.__manager.attachIP(self.__name, segment, dev, IP, gw)
 
 ## ContainerManager
 #
@@ -62,6 +70,16 @@ class ContainerManager(object):
     # @return CommandResult
     @abstractmethod
     def command(self, name, command):
+        pass
+    ## attach IP to container
+    # @param self The object pointer
+    # @param name The name of container
+    # @param segment The name of the segment which the IP is attached on
+    # @param dev The device name of container
+    # @param IP The IP attached to the container
+    # @param gw The gateway address if the device is default gateway
+    @abstractmethod
+    def attachIP(self, name, segment, dev, IP, gw):
         pass
     ## create container
     # @param self The object pointer
