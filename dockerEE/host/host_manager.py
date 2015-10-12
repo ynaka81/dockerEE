@@ -14,15 +14,18 @@ class Bridge(object):
         ## network address
         self.__network_address = network_address
         # create myself
-        self.__manager.createBridgeImpl(self.__network_address)
+        self.__manager.createBridgeImpl(self)
     ## destructor
     def __del__(self):
         # destroy myself
-        self.__manager.destroyBridgeImpl(self.__network_address)
-    ## get container network address
+        self.__manager.destroyBridgeImpl(self)
+    ## get bridge network address
     # @param self The object pointer
     def getNetworkAddress(self):
         return self.__network_address
+    ## get name
+    def getName(self):
+        return "br_" + str(self.__network_address).split("/")[0]
 
 ## HostManager
 #
@@ -33,15 +36,15 @@ class HostManager(object):
     __bridge = WeakSet()
     ## abstract method of creating bridge
     # @param self The object pointer
-    # @param network_address The network address of the bridge
+    # @param bridge The bridge that will be created
     @abstractmethod
-    def createBridgeImpl(self, network_address):
+    def createBridgeImpl(self, bridge):
         pass
     ## abstract method of destroying container
     # @param self The object pointer
-    # @param network_address The network address of the bridge
+    # @param bridge The bridge that will be deleted
     @abstractmethod
-    def destroyBridgeImpl(self, network_address):
+    def destroyBridgeImpl(self, bridge):
         pass
     ## create bridge
     # @param self The object pointer

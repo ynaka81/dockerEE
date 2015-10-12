@@ -17,14 +17,14 @@ class HostManagerStub(HostManager):
         self.__network = []
     ## stub method of creating bridge
     # @param self The object pointer
-    # @param network_address The network address of the bridge
-    def createBridgeImpl(self, network_address):
-        self.__network.append(network_address)
+    # @param bridge The bridge that will be created
+    def createBridgeImpl(self, bridge):
+        self.__network.append(bridge.getNetworkAddress())
     ## stub method of destroying container
     # @param self The object pointer
-    # @param network_address The network address of the bridge
-    def destroyBridgeImpl(self, network_address):
-        self.__network.remove(network_address)
+    # @param bridge The bridge that will be deleted
+    def destroyBridgeImpl(self, bridge):
+        self.__network.remove(bridge.getNetworkAddress())
     ## get the list of network address
     # @param self The object pointer
     # @return the list of network address
