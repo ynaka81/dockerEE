@@ -5,6 +5,7 @@ sys.path.append("/vagrant/dockerEE/host")
 from host_manager import HostManager
 sys.path.append("../../")
 from dockerEE.remote import RemoteInterfaceImpl
+from dockerEE.host import HostManagerImpl
 
 ## HostManagerStub
 #
@@ -69,6 +70,42 @@ class TestHostManager(unittest.TestCase):
         self.assertEqual(self.__manager.get(), [ip2.network])
         del b2
         self.assertEqual(self.__manager.get(), [])
+
+## TestHostManagerImpl
+#
+# The test case for HostManagerImpl
+class TestHostManagerImpl(unittest.TestCase):
+    ## init test case
+    def setUp(self):
+        host = "localhost"
+        user = "vagrant"
+        password = "vagrant"
+        ## remote interface
+        self.__interface = RemoteInterfaceImpl(host, user, password)
+        ## host OS manager
+        self.__manager = HostManagerImpl(host, user, password)
+    ## check if the bridge exists
+    # @param self The object pointer
+    # @param network_address The network address of the bridge
+    def __checkBridgeExist(self, network):
+        ret = self.__interface.sudo("ip addr show | grep br_" + str(network).split("/")[0], True)
+        return ret.rc == 0
+    ## test HostManager.createBridge(network_address)
+    # @param self The object pointer
+    def testCreateBridge(self):
+        ip = ip_interface(u"192.168.33.10/24")
+        b = self.__manager.createBridge(ip.network)
+        self.assertTrue(self.__checkBridgeExist(ip.network))
+        del b
+        self.assertFalse(self.__checkBridgeExist(ip.network))
+
+    ## test HostManager.createBridge(network_address) fail because the bridge already exists
+    # @param self The object pointer
+    def testFailCreateBridge(self):
+        ip = ip_interface(u"192.168.33.10/24")
+        self.__interface.sudo("brctl addbr br_" + str(ip.network).split("/")[0])
+        with self.assertRaises(RuntimeError):
+            b = self.__manager.createBridge(ip.network)
 
 if __name__ == "__main__":
     unittest.main()
