@@ -13,14 +13,20 @@ class TestService(ServiceDaemon):
     def __init__(self):
         ServiceDaemon.__init__(self, "~/.dockerEE/test_service_service_daemon.pid")
         ## check file whether destrustor is called
-        self.__check_file = file(os.path.expanduser("~/.dockerEE/test_service_service_daemon.check"), "w")
+        self.__check_destructor_file = file(os.path.expanduser("~/.dockerEE/test_service_service_daemon.check_destructor"), "w")
+        ## check file whether _delApp is called
+        self.__check_del_app_file = file(os.path.expanduser("~/.dockerEE/test_service_service_daemon.check_delApp"), "w")
     ## destrustor
     def __del__(self):
-        os.remove(self.__check_file.name)
+        os.remove(self.__check_destructor_file.name)
     ## the implementation of application specific initialization before service loop
     # @param self The object pointer
     def _initApp(self):
         self.__counter = 0
+    ## the implementation of application specific destruction before service stop
+    # @param self The object pointer
+    def _delApp(self):
+        os.remove(self.__check_del_app_file.name)
     ## exposed method of getting counter
     # @param self The object pointer
     # @return counter

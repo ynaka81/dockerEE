@@ -28,12 +28,16 @@ class TestServiceDaemon(unittest.TestCase):
     def testStartStop(self):
         ret = self.__service.start(self.__filename)
         self.assertEqual(ret.rc, 0)
-        ret = self.__interface.sudo("test -f ~/.dockerEE/test_service_service_daemon.check", True)
+        ret = self.__interface.sudo("test -f ~/.dockerEE/test_service_service_daemon.check_destructor", True)
+        self.assertEqual(ret.rc, 0)
+        ret = self.__interface.sudo("test -f ~/.dockerEE/test_service_service_daemon.check_delApp", True)
         self.assertEqual(ret.rc, 0)
         time.sleep(1)
         ret = self.__service.stop()
         self.assertEqual(ret.rc, 0)
         ret = self.__interface.sudo("test -f ~/.dockerEE/test_service_service_daemon.check", True)
+        self.assertNotEqual(ret.rc, 0)
+        ret = self.__interface.sudo("test -f ~/.dockerEE/test_service_service_daemon.check_delApp", True)
         self.assertNotEqual(ret.rc, 0)
     ## test ServiceDaemon._getInstance(self)
     # @param self The object pointer

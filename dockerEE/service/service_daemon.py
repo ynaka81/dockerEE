@@ -38,6 +38,10 @@ class ServiceDaemon(object):
     # @param self The object pointer
     def _initApp(self):
         pass
+    ## the virtual method of application specific destruction before service stop
+    # @param self The object pointer
+    def _delApp(self):
+        pass
     ## the implementation of running application
     # @param self The object pointer
     def run(self):
@@ -75,6 +79,9 @@ class ServiceDaemon(object):
                         daemon.events(daemon_events)
                 # unregister myself when service daemon exit
                 except SystemExit:
+                    # application specific destruction
+                    self._delApp()
+                    # unregister myself
                     daemon.unregister(self)
                     raise
         except Exception, e:
