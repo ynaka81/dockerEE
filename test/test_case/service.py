@@ -60,7 +60,6 @@ class TestEnvironmentEmulationService(unittest.TestCase):
     ## test "python service.py start/stop"
     # @param self The object pointer
     def testStartStop(self):
-        time.sleep(10)
         servers = [x["name"] for x in self.__parameter["servers"]]
         ret = self.__service.start(self.__filename)
         time.sleep(10)

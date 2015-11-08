@@ -19,22 +19,38 @@ class Container(object):
         self.__manager.createContainer(self.__name, **options)
     ## destructor
     def __del__(self):
-        # destroy myself
-        self.__manager.destroyContainer(self.__name)
+        if self.__manager is not None:
+            self.destroy()
+    ## check if the container is destroy
+    # @param self The object pointer
+    def __checkDestroyed(self):
+        if self.__manager is None:
+            raise RuntimeError("The conainer(" + self.__name + ") is already destroyed.")
+    ## destroy container
+    # @param self The object pointer
+    def destroy(self):
+        if self.__manager is not None:
+            # destroy myself
+            self.__manager.destroyContainer(self.__name)
+            # initialize variables
+            self.__manager = None
     ## get container name
     # @param self The object pointer
     def getName(self):
+        self.__checkDestroyed()
         return self.__name
     ## get container options
     # @param self The object pointer
     # @return container options
     def getOptions(self):
+        self.__checkDestroyed()
         return self.__options
     ## execute command on container
     # @param self The object pointer
     # @param command The command to execute on container
     # @return CommandResult
     def command(self, command):
+        self.__checkDestroyed()
         return self.__manager.command(self.__name, command)
     ## attach IP to container
     # @param self The object pointer
@@ -43,6 +59,7 @@ class Container(object):
     # @param IP The IP attached to the container
     # @param gw The gateway address if the device is default gateway
     def attachIP(self, segment, dev, IP, gw=None):
+        self.__checkDestroyed()
         self.__manager.attachIP(self.__name, segment, dev, IP, gw)
 
 ## ContainerManager

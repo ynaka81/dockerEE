@@ -33,6 +33,12 @@ class EnvironmentEmulationServiceDaemon(ServiceDaemon):
         # load environment
         parameter = YamlParser()(sys.argv[2])
         self.__items["servers"] = ServerLoader()(self.__container_manager, self.__host_manager, parameter["servers"])
+    ## the implementation of application specific detruction before service stop
+    # @param self The object pointer
+    def _delApp(self):
+        # destroy environment
+        for s in self.__items["servers"].values():
+            s.destroy()
     ## exposed method of getting item status
     # @param self The object pointer
     # @return item status list

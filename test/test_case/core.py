@@ -28,12 +28,27 @@ class TestContainer(unittest.TestCase):
         c1 = self.__manager.create(container)
         del c1
         self.assertFalse(self.__utils.checkContainerExist(container))
+    ## test Container.destroy(self):
+    # @param self The object pointer
+    def testDestroy(self):
+        container = "c1"
+        c1 = self.__manager.create(container)
+        c1.destroy()
+        self.assertFalse(self.__utils.checkContainerExist(container))
     ## test Container.command(command)
     def testCommand(self):
         container = "c1"
         c1 = self.__manager.create(container)
         ret = c1.command("uname -n")
         self.assertEqual(ret.stdout, container)
+    ## test Container.__checkDestroyed(self):
+    # @param self The object pointer
+    def testCheckDestroyed(self):
+        container = "c1"
+        c1 = self.__manager.create(container)
+        c1.destroy()
+        with self.assertRaises(RuntimeError):
+            c1.command("uname -n")
     ## test Container.attachIP(segment, dev, IP, gw)
     # @param self The object pointer
     def testAttachIP(self):
