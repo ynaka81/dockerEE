@@ -2,6 +2,7 @@ import sys
 sys.path.append("../../")
 from service_daemon import ServiceDaemon
 from dockerEE.core import ContainerManagerImpl
+from dockerEE.host import HostManagerImpl
 from dockerEE.loader import ServerLoader
 from dockerEE.parser import YamlParser
 
@@ -15,20 +16,23 @@ class EnvironmentEmulationServiceDaemon(ServiceDaemon):
     # @param password The login password
     def __init__(self, host=None, user=None, password=None):
         ServiceDaemon.__init__(self, "~/.dockerEE/environment_emulation_service.pid")
-        ## container manager connection info
+        ## manager connection info
         self.__conn_info = {"host": host, "user": user, "password": password}
         ## container manager
-        self.__manager = None
+        self.__container_manager = None
+        ## host OS manager
+        self.__host_manager = None
         ## environment emulation items
         self.__items = {}
     ## the implementation of application specific initialization before service loop
     # @param self The object pointer
     def _initApp(self):
         # create emulation environment
-        self.__manager = ContainerManagerImpl(**self.__conn_info)
+        self.__container_manager = ContainerManagerImpl(**self.__conn_info)
+        self.__host_manager = HostManagerImpl(**self.__conn_info)
         # load environment
         parameter = YamlParser()(sys.argv[2])
-        self.__items["servers"] = ServerLoader()(self.__manager, parameter["servers"])
+        self.__items["servers"] = ServerLoader()(self.__container_manager, self.__host_manager, parameter["servers"])
     ## exposed method of getting item status
     # @param self The object pointer
     # @return item status list
@@ -43,7 +47,7 @@ class EnvironmentEmulationServiceDaemon(ServiceDaemon):
     # @param self The object pointer
     # @param server The reload server name
     def reloadServer(self, server):
-        self.__items["servers"][server].reload(self.__manager)
+        self.__items["servers"][server].reload(self.__container_manager, self.__host_manager)
     ## the implementation of displaying status
     # @param self The object pointer
     # @return The status message
