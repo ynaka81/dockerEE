@@ -63,6 +63,18 @@ class TestServer(unittest.TestCase):
         servers[1].destroy()
         self.assertTrue(self.__utils.checkContainerNotExist([s["name"] for s in server_info]))
         self.assertNotIn("br_192.168.0.0", self.__interface.sudo("ip addr show").stdout)
+    ## test Server.getNetworkInfo(self)
+    # @param self The object pointer
+    def testGetNetworkInfo(self):
+        network = [{"dev": "eth0", "IP": ip_interface(u"192.168.0.1/24")}, {"dev": "eth1", "IP": ip_interface(u"192.168.1.2/24"), "gw": ip_interface(u"192.168.1.254/24")}]
+        s1 = Server(self.__container_manager, "s1")
+        for n in network:
+            if "gw" in n:
+                s1.attachIP(self.__host_manager, n["dev"], n["IP"], n["gw"])
+            else:
+                s1.attachIP(self.__host_manager, n["dev"], n["IP"])
+        network[0]["gw"] = None
+        self.assertEqual(s1.getNetworkInfo(), network)
     ## test Server.command(command)
     def testCommand(self):
         server = "s1"

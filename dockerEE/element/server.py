@@ -35,6 +35,14 @@ class Server(object):
     def getName(self):
         self.__checkDestroyed()
         return self.__container.getName()
+    ## get server network info
+    # @param self The object pointer
+    def getNetworkInfo(self):
+        self.__checkDestroyed()
+        network = []
+        for n in self.__network:
+            network.append({"dev": n["dev"], "IP": n["IP"], "gw": n["gw"]})
+        return network
     ## execute command on server
     # @param self The object pointer
     # @param command The command to execute on server

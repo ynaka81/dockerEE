@@ -30,7 +30,7 @@ class TestEnvironmentEmulationService(unittest.TestCase):
         ## remote interface
         self.__interface = RemoteInterfaceImpl(host, user, password)
         ## env.yml parameter
-        self.__parameter = {"servers":[{"name": "c1", "image": "centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.1", "gw": "192.168.0.254"}]}, {"name": "c2", "image": "centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.2"}, {"dev": "eth1", "IP": "192.168.1.2", "gw": "192.168.1.254"}]}]}
+        self.__parameter = {"servers":[{"name": "c1", "image": "centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.1/24", "gw": "192.168.0.254/24"}]}, {"name": "c2", "image": "centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.2/24"}, {"dev": "eth1", "IP": "192.168.1.2/24", "gw": "192.168.1.254/24"}]}]}
         ## test utils
         self.__utils = DockerContainerTestUtils(host, user, password)
         ## environment definition file
@@ -82,8 +82,15 @@ class TestEnvironmentEmulationService(unittest.TestCase):
         time.sleep(10)
         ret = self.__service.status()
         status =  "servers\n"
-        status += "\tc2\n"
-        status += "\tc1"
+        for p in self.__parameter["servers"]:
+            status += "\t" + p["name"] + "\n"
+            for n in p["IPs"]:
+                status += "\t\t" + n["dev"] + " : " + n["IP"]
+                if "gw" in n:
+                    status += " via " + n["gw"] + "\n"
+                else:
+                    status += "\n"
+        ret.stdout += "\n"
         self.assertIn(status, ret.stdout)
         self.__service.stop()
         time.sleep(10)

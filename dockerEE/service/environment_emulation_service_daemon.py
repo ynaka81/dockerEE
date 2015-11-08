@@ -48,6 +48,10 @@ class EnvironmentEmulationServiceDaemon(ServiceDaemon):
         items["servers"] = {}
         for k, v in self.__items["servers"].items():
             items["servers"][k] = {}
+            for n in v.getNetworkInfo():
+                items["servers"][k][n["dev"]] = str(n["IP"])
+                if n["gw"] is not None:
+                    items["servers"][k][n["dev"]] += " via " + str(n["gw"])
         return items
     ## exposed method of reloading server
     # @param self The object pointer
@@ -61,12 +65,15 @@ class EnvironmentEmulationServiceDaemon(ServiceDaemon):
         try:
             items = self._getInstance().getItemStatus()
             status = "loaded items\n"
-            for k1, v1 in items.items():
+            for k1 in sorted(items.keys()):
+                v1 = items[k1]
                 status += k1 + "\n"
-                for k2, v2 in v1.items():
+                for k2 in sorted(v1.keys()):
+                    v2 = v1[k2]
                     status += "\t" + k2 + "\n"
-                    for k3, v3 in v2.items():
-                        status += "\t\t" + k3 + ":" + v3 + "\n"
+                    for k3 in sorted(v2.keys()):
+                        v3 = v2[k3]
+                        status += "\t\t" + k3 + " : " + v3 + "\n"
             return status
         except Exception:
             return "inactive"
