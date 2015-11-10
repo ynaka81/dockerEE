@@ -70,7 +70,7 @@ class TestEnvironmentEmulationService(unittest.TestCase):
                 self.assertTrue(re.search(r"inet " + n["IP"] + ".*" + n["dev"], ret.stdout))
                 if "gw" in n:
                     ret = self.__interface.sudo("docker exec -it " + p["name"] + " ip route show")
-                    self.assertIn("default via " + n["gw"] + " dev " + n["dev"], ret.stdout)
+                    self.assertIn("default via " + n["gw"].split("/")[0] + " dev " + n["dev"], ret.stdout)
         self.__service.stop()
         time.sleep(10)
         self.assertTrue(self.__utils.checkContainerNotExist(servers))
@@ -117,7 +117,7 @@ class TestEnvironmentEmulationService(unittest.TestCase):
                 self.assertTrue(re.search(r"inet " + n["IP"] + ".*" + n["dev"], ret.stdout))
                 if "gw" in n:
                     ret = self.__interface.sudo("docker exec -it " + p["name"] + " ip route show")
-                    self.assertIn("default via " + n["gw"] + " dev " + n["dev"], ret.stdout)
+                    self.assertIn("default via " + n["gw"].split("/")[0] + " dev " + n["dev"], ret.stdout)
         self.__service.stop(10)
 
 if __name__ == "__main__":
