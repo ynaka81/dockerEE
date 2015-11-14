@@ -41,9 +41,10 @@ class Container(object):
     ## execute command on container
     # @param self The object pointer
     # @param command The command to execute on container
+    # @param tty Whether allocate pseudo tty
     # @return CommandResult
-    def command(self, command):
-        return self.__manager.command(self, command)
+    def command(self, command, tty=False):
+        return self.__manager.command(self, command, tty)
     ## attach IP to container
     # @param self The object pointer
     # @param segment The name of the segment which the IP is attached on
@@ -77,9 +78,10 @@ class ContainerManager(object):
     # @param self The object pointer
     # @param container The container that will be created
     # @param command The command to execute on container
+    # @param tty Whether allocate pseudo tty
     # @return CommandResult
     @abstractmethod
-    def command(self, container, command):
+    def command(self, container, command, tty):
         pass
     ## abstract method of attaching IP to container
     # @param self The object pointer

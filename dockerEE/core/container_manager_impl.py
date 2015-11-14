@@ -45,10 +45,11 @@ class ContainerManagerImpl(ContainerManager):
     # @param self The object pointer
     # @param container The container that will be created
     # @param command The command to execute on container
+    # @param tty Whether allocate pseudo tty
     # @return CommandResult
-    def command(self, container, command):
+    def command(self, container, command, tty):
         # execute command on container
-        ret = self.__interface.sudo("docker exec -it " + container.getName() + " " + command, True)
+        ret = self.__interface.sudo("docker exec -i" + ("t " if tty else " ")  + container.getName() + " " + command, True)
         if ret.rc != 0:
             raise RuntimeError("Failed to execute command(\"" + command + "\") on container(" + container.getName() + "): " + ret.stderr)
         return ret

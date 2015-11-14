@@ -34,8 +34,9 @@ class ContainerManagerStub(ContainerManager):
     # @param self The object pointer
     # @param container The container that will be created
     # @param command The command to execute on container
+    # @param tty Whether allocate pseudo tty
     # @return CommandResult
-    def command(self, container, command):
+    def command(self, container, command, tty):
         return CommandResult(command, 0, "stdout", "stderr")
     ## stub method of attaching IP to container
     # @param self The object pointer
