@@ -15,9 +15,16 @@ class Bridge(object):
         self.__network_address = network_address
         # create myself
         self.__manager.createBridgeImpl(self)
+        ## whether successfully created container
+        self.__created = True
     ## destructor
     def __del__(self):
-        self.__manager.destroyBridgeImpl(self)
+        # destroy myself
+        try:
+            self.__created
+            self.__manager.destroyBridgeImpl(self)
+        except AttributeError:
+            pass
     ## get bridge network address
     # @param self The object pointer
     def getNetworkAddress(self):

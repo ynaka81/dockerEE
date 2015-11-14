@@ -18,10 +18,17 @@ class Container(object):
         self.__options = options
         # create myself
         self.__manager.createContainerImpl(self, **options)
+        ## whether successfully created container
+        self.__created = True
     ## destructor
+    # @param self The object pointer
     def __del__(self):
         # destroy myself
-        self.__manager.destroyContainerImpl(self)
+        try:
+            self.__created
+            self.__manager.destroyContainerImpl(self)
+        except AttributeError:
+            pass
     ## get container name
     # @param self The object pointer
     def getName(self):

@@ -106,6 +106,8 @@ class TestHostManagerImpl(unittest.TestCase):
         self.__interface.sudo("brctl addbr br_" + str(ip.network).split("/")[0])
         with self.assertRaises(RuntimeError):
             b = self.__manager.createBridge(ip.network)
+        self.__interface.sudo("ip link set br_" + str(ip.network).split("/")[0] + " down")
+        self.__interface.sudo("brctl delbr br_" + str(ip.network).split("/")[0])
 
 if __name__ == "__main__":
     unittest.main()
