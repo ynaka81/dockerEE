@@ -102,22 +102,6 @@ class TestContainer(unittest.TestCase):
         self.assertIn(container, [_c["name"] for _c in self.__manager.get()])
         del c
         self.assertNotIn(container, [_c["name"] for _c in self.__manager.get()])
-    ## test Container.destroy(self):
-    # @param self The object pointer
-    def testDestroy(self):
-        container = "c"
-        c = self.__manager.create(container)
-        self.assertIn(container, [_c["name"] for _c in self.__manager.get()])
-        c.destroy()
-        self.assertNotIn(container, [_c["name"] for _c in self.__manager.get()])
-    ## test Container.__checkDestroyed(self):
-    # @param self The object pointer
-    def testCheckDestroyed(self):
-        container = "c"
-        c = self.__manager.create(container)
-        c.destroy()
-        with self.assertRaises(RuntimeError):
-            c.command("command")
     ## test Container.getName()
     # @param self The object pointer
     def testGetName(self):
@@ -266,15 +250,6 @@ class TestContainerManagerImpl(unittest.TestCase):
         self.__interface.sudo("service docker stop")
         with self.assertRaises(RuntimeError):
             self.__manager.create("c1")
-        self.__interface.sudo("service docker start")
-    ## test ContainerManagerImpl.destroyContainerImpl(container) fail because docker service is not normally running
-    # @param self The object pointer
-    def testFailDestroyContainerDockerNotRunning(self):
-        container = "c1"
-        c = self.__manager.create(container)
-        self.__interface.sudo("service docker stop")
-        with self.assertRaises(RuntimeError):
-            c.destroy()
         self.__interface.sudo("service docker start")
     ## test ContainerManagerImpl.command(container, command) fail because the command does not exist
     # @param self The object pointer

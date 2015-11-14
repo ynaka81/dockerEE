@@ -17,29 +17,13 @@ class Bridge(object):
         self.__manager.createBridgeImpl(self)
     ## destructor
     def __del__(self):
-        if self.__manager is not None:
-            self.destroy()
-    ## check if the bridge is destroy
-    # @param self The object pointer
-    def __checkDestroyed(self):
-        if self.__manager is None:
-            raise RuntimeError("The bridge(" + str(self.__network_address) + ") is already destroyed.")
-    ## destroy bridge
-    # @param self The object pointer
-    def destroy(self):
-        if self.__manager is not None:
-            # destroy myself
-            self.__manager.destroyBridgeImpl(self)
-            # initialize variables
-            self.__manager = None
+        self.__manager.destroyBridgeImpl(self)
     ## get bridge network address
     # @param self The object pointer
     def getNetworkAddress(self):
-        self.__checkDestroyed()
         return self.__network_address
     ## get name
     def getName(self):
-        self.__checkDestroyed()
         return "br_" + str(self.__network_address).split("/")[0]
 
 ## HostManager

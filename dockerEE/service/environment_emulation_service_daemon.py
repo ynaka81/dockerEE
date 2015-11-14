@@ -37,8 +37,8 @@ class EnvironmentEmulationServiceDaemon(ServiceDaemon):
     # @param self The object pointer
     def _delApp(self):
         # destroy environment
-        for s in self.__items["servers"].values():
-            s.destroy()
+        for k in self.__items["servers"].keys():
+            del self.__items["servers"][k]
     ## exposed method of getting item status
     # @param self The object pointer
     # @return item status list

@@ -38,29 +38,19 @@ class TestServer(unittest.TestCase):
         self.assertTrue(self.__utils.checkContainerExist(servers))
         del s[:]
         self.assertFalse(self.__utils.checkContainerExist(servers))
-    ## test Server.destroy(self)
-    # @param self The object pointer
-    def testDestroy(self):
-        servers = ["c1", "c2"]
-        s = [Server(self.__container_manager, _s) for _s in servers]
-        self.assertTrue(self.__utils.checkContainerExist(servers))
-        for _s in s:
-            _s.destroy()
-        self.assertFalse(self.__utils.checkContainerExist(servers))
-    ## test Server.destroy(self) with IP
+    ## test Server.__del__(self) with IP
     # @param self The object pointer
     def testDestroyIP(self):
         server_info = [{"name": "c1", "ip": ip_interface(u"192.168.0.1/24")}, {"name": "c2", "ip": ip_interface(u"192.168.0.2/24")}]
         servers = []
         for s in server_info:
-            server = Server(self.__container_manager, s["name"])
-            server.attachIP(self.__host_manager, "eth0", s["ip"])
-            servers.append(server)
+            servers.append(Server(self.__container_manager, s["name"]))
+            servers[-1].attachIP(self.__host_manager, "eth0", s["ip"])
         self.assertTrue(self.__utils.checkContainerExist([s["name"] for s in server_info]))
         self.assertIn("br_192.168.0.0", self.__interface.sudo("ip addr show").stdout)
-        servers[0].destroy()
+        del servers[0]
         self.assertIn("br_192.168.0.0", self.__interface.sudo("ip addr show").stdout)
-        servers[1].destroy()
+        del servers[0]
         self.assertTrue(self.__utils.checkContainerNotExist([s["name"] for s in server_info]))
         self.assertNotIn("br_192.168.0.0", self.__interface.sudo("ip addr show").stdout)
     ## test Server.getNetworkInfo(self)
