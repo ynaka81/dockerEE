@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from weakref import WeakSet
 
 ## Container
 #
@@ -16,7 +17,7 @@ class Container(object):
         ## container create options
         self.__options = options
         # create myself
-        self.__manager.createContainer(self.__name, **options)
+        self.__manager.createContainerImpl(self, **options)
     ## destructor
     def __del__(self):
         if self.__manager is not None:
@@ -31,7 +32,7 @@ class Container(object):
     def destroy(self):
         if self.__manager is not None:
             # destroy myself
-            self.__manager.destroyContainer(self.__name)
+            self.__manager.destroyContainerImpl(self)
             # initialize variables
             self.__manager = None
     ## get container name
@@ -51,7 +52,7 @@ class Container(object):
     # @return CommandResult
     def command(self, command):
         self.__checkDestroyed()
-        return self.__manager.command(self.__name, command)
+        return self.__manager.command(self, command)
     ## attach IP to container
     # @param self The object pointer
     # @param segment The name of the segment which the IP is attached on
@@ -60,43 +61,45 @@ class Container(object):
     # @param gw The gateway address if the device is default gateway
     def attachIP(self, segment, dev, IP, gw=None):
         self.__checkDestroyed()
-        self.__manager.attachIP(self.__name, segment, dev, IP, gw)
+        self.__manager.attachIP(self, segment, dev, IP, gw)
 
 ## ContainerManager
 #
 # The interface class to control container
 class ContainerManager(object):
     __metaclass__ = ABCMeta
+    ## weak reference of container
+    __container = WeakSet()
     ## abstract method of creating container
     # @param self The object pointer
-    # @param name The name of container
+    # @param container The container that will be created
     # @param options The options to create container
     @abstractmethod
-    def createContainer(self, name, **options):
+    def createContainerImpl(self, container, **options):
         pass
     ## abstract method of destroying container
     # @param self The object pointer
-    # @param name The name of container
+    # @param container The container that will be created
     @abstractmethod
-    def destroyContainer(self, name):
+    def destroyContainerImpl(self, container):
         pass
-    ## abstractmethod of executing command on container
+    ## abstract method of executing command on container
     # @param self The object pointer
-    # @param name The name of container
+    # @param container The container that will be created
     # @param command The command to execute on container
     # @return CommandResult
     @abstractmethod
-    def command(self, name, command):
+    def command(self, container, command):
         pass
-    ## attach IP to container
+    ## abstract method of attaching IP to container
     # @param self The object pointer
-    # @param name The name of container
+    # @param container The container that will be created
     # @param segment The name of the segment which the IP is attached on
     # @param dev The device name of container
     # @param IP The IP attached to the container
     # @param gw The gateway address if the device is default gateway
     @abstractmethod
-    def attachIP(self, name, segment, dev, IP, gw):
+    def attachIP(self, container, segment, dev, IP, gw):
         pass
     ## create container
     # @param self The object pointer
@@ -104,4 +107,11 @@ class ContainerManager(object):
     # @param options The options to create container
     # @return container
     def create(self, name, **options):
-        return Container(self, name, **options)
+        # raise exception if the container already exists
+        try:
+            (c for c in self.__container if c.getName() == name).next()
+            raise ValueError("The container (" + name + ") is already running.")
+        except StopIteration:
+            c = Container(self, name, **options)
+            self.__container.add(c)
+            return c

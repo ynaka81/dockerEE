@@ -73,7 +73,7 @@ class Server(object):
         # delete and create container
         name = self.getName()
         options = self.__container.getOptions()
-        self.__container.destroy()
+        del self.__container
         self.__container = container_manager.create(name, **options)
         # attach IP
         for n in self.__network:
