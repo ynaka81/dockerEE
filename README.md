@@ -29,16 +29,20 @@ To start emulation environment defined by demo/hello_dockerEE/env.yml,
 
     $ python main.py start demo/hello_dockerEE/env.yml
 
-After starting environment, you can get the status,
+After starting the environment, you can get the status,
 
     $ python main.py status
+
            Active: active (running)
          Main PID: 3603
 
      App Specific: loaded items
     servers
-            c2
             c1
+                    eth0 : 192.168.0.1/24 via 192.168.0.254/24
+            c2
+                    eth0 : 192.168.0.2/24
+                    eth1 : 192.168.1.2/24 via 192.168.1.254/24
 
 When you finish to use the environment, you can stop,
 
@@ -53,19 +57,19 @@ Development status
 The project is now in development.
 The development status is below.
 
-- [ ] OS
+- [x] OS
     * [x] start
     * [x] stop
     * [x] status
-    * [ ] restart
+    * [x] restart
 - [ ] network
     * [ ] start
     * [ ] stop
     * [ ] status
     * [ ] restart
-- [ ] service interface
+- [x] service interface
     * [x] start
     * [x] stop
     * [x] status
-    * [ ] restart
+    * [x] restart
 - [ ] middleware
