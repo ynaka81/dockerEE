@@ -20,7 +20,7 @@ class ContainerManagerImpl(ContainerManager):
     # @param container The container that will be created
     # @param privilege The privilege attached to docker container
     # @param image The image of container
-    def createContainerImpl(self, container, privilege=["NET_ADMIN"], hosts=[], image="centos"):
+    def createContainerImpl(self, container, privilege=["NET_ADMIN"], hosts=[], image="local/centos"):
         cmd = "docker run --name=" + container.getName() + " --hostname=" + container.getName() + " --net=none"
         # add privilege
         for p in privilege:

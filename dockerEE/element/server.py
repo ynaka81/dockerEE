@@ -8,7 +8,7 @@ class Server(object):
     # @param container_manager The container manager
     # @param name The name of container
     # @param source The source image of the server
-    def __init__(self, container_manager, name, source="centos"):
+    def __init__(self, container_manager, name, source="local/centos"):
         ## server container
         self.__container = container_manager.create(name, image=source)
         ## network info
