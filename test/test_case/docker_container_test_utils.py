@@ -1,5 +1,6 @@
 import sys
 sys.path.append("../../")
+
 from dockerEE.remote import RemoteInterfaceImpl
 
 ## DockerContainerTestUtils
@@ -16,7 +17,7 @@ class DockerContainerTestUtils(object):
     ## inner function of checking whether the container exists
     # @param self The object pointer
     # @param containers The name of containers
-    # @param all_exist True:all containers exist, False:all containers not exist
+    # @param all_exist True:all containers exist, False:all containers does not exist
     def __checkContainerExist(self, containers, all_exist):
         if not isinstance(containers, list):
             containers = [containers]
@@ -31,12 +32,12 @@ class DockerContainerTestUtils(object):
                 if all_exist:
                     return False
         return len(lines) == len(containers) if all_exist else len(lines) == 0
-    ## check whether the all containers exist
+    ## check whether all containers exist
     # @param self The object pointer
     # @param containers The name of containers
     def checkContainerExist(self, containers):
         return self.__checkContainerExist(containers, True)
-    ## check whether the all containers not exist
+    ## check whether all containers does not exist
     # @param self The object pointer
     # @param containers The name of containers
     def checkContainerNotExist(self, containers):

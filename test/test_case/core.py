@@ -1,15 +1,18 @@
-import unittest
 import sys
-from ipaddress import ip_interface
-import re
 sys.path.append("/vagrant/dockerEE/remote")
-from remote_interface import CommandResult
 sys.path.append("/vagrant/dockerEE/core")
-from container_manager import ContainerManager
 sys.path.append("../../")
+
+import unittest
+import re
+from ipaddress import ip_interface
+
 from dockerEE.remote import RemoteInterfaceImpl
 from dockerEE.core import ContainerManagerImpl
+
 from docker_container_test_utils import DockerContainerTestUtils
+from remote_interface import CommandResult
+from container_manager import ContainerManager
 
 ## ContainerManagerStub
 #
@@ -62,6 +65,7 @@ class ContainerManagerStub(ContainerManager):
 # The test case for ContainerManager
 class TestContainerManager(unittest.TestCase):
     ## init test case
+    # @param self The object pointer
     def setUp(self):
         ## container_manager
         self.__manager = ContainerManagerStub()
@@ -80,7 +84,7 @@ class TestContainerManager(unittest.TestCase):
         c = self.__manager.create(container["name"], **container["options"])
         self.assertEqual(self.__manager.get(), [container])
 
-    ## test ContainerManager.create(name) fails because of the container already exists
+    ## test ContainerManager.create(name) fails because the container already exists
     # @param self The object pointer
     def testFailCreate(self):
         container = "c"
@@ -93,10 +97,12 @@ class TestContainerManager(unittest.TestCase):
 # The test case for Container
 class TestContainer(unittest.TestCase):
     ## init test case
+    # @param self The object pointer
     def setUp(self):
         ## container_manager
         self.__manager = ContainerManagerStub()
     ## test Container.__del__(self)
+    # @param self The object pointer
     def testDel(self):
         container = "c"
         c = self.__manager.create(container)
@@ -122,11 +128,10 @@ class TestContainer(unittest.TestCase):
         container = "c"
         c = self.__manager.create(container)
         ret = c.command("command")
-        cr = CommandResult("command", 0, "stdout", "stderr")
-        self.assertEqual(ret.command, cr.command)
-        self.assertEqual(ret.rc, cr.rc)
-        self.assertEqual(ret.stdout, cr.stdout)
-        self.assertEqual(ret.stderr, cr.stderr)
+        self.assertEqual(ret.command, "command")
+        self.assertEqual(ret.rc, 0)
+        self.assertEqual(ret.stdout, "stdout")
+        self.assertEqual(ret.stderr, "stderr")
     ## test Container.attachIP(segment, dev, IP)
     # @param self The object pointer
     def testAttachIP(self):
@@ -154,16 +159,15 @@ class TestContainer(unittest.TestCase):
 # The test case for ContainerManagerImpl
 class TestContainerManagerImpl(unittest.TestCase):
     ## init test case
+    # @param self The object pointer
     def setUp(self):
-        host = "localhost"
-        user = "vagrant"
-        password = "vagrant"
+        arg = {"host": "localhost", "user": "vagrant", "password": "vagrant"}
         ## remote interface
-        self.__interface = RemoteInterfaceImpl(host, user, password)
+        self.__interface = RemoteInterfaceImpl(**arg)
         ## container_manager
-        self.__manager = ContainerManagerImpl(host, user, password)
+        self.__manager = ContainerManagerImpl(**arg)
         ## test utils
-        self.__utils = DockerContainerTestUtils(host, user, password)
+        self.__utils = DockerContainerTestUtils(**arg)
     ## test ContainerManagerImpl.create(name)
     # @param self The object pointer
     def testCreate(self):
@@ -183,13 +187,17 @@ class TestContainerManagerImpl(unittest.TestCase):
         container = "c1"
         hosts = [{"name": "c1", "IP": "1.0.1.10"}, {"name": "c2", "IP": "1.0.1.11"}]
         c = self.__manager.create(container, hosts=hosts)
-        ret = self.__interface.sudo("docker exec -it " + container + " cat /etc/hosts")
-        container_hosts = ret.stdout.splitlines()[-len(hosts) - 1::2]
+        # loop until the stdout is correctly gotten, maybe it maybe depends on docker bug?
+        for i in range(10):
+            ret = self.__interface.sudo("docker exec -it " + container + " cat /etc/hosts")
+            container_hosts = ret.stdout.splitlines()[-len(hosts) - 1::2]
+            if len(hosts) == len(container_hosts):
+                break
         for i in range(len(hosts)):
-            host = hosts[i]
             container_host = container_hosts[i].split()
-            self.assertEqual(host["name"], container_host[1])
-            self.assertEqual(host["IP"], container_host[0])
+            host = hosts[i]
+            self.assertEqual(container_host[1], host["name"])
+            self.assertEqual(container_host[0], host["IP"])
     ## test ContainerManagerImpl.create(name, image)
     # @param self The object pointer
     def testCreateWithImage(self):
@@ -199,7 +207,7 @@ class TestContainerManagerImpl(unittest.TestCase):
         ret = self.__interface.sudo("docker ps -a")
         lines = ret.stdout.splitlines()
         self.assertIn(image, lines[1].split())
-    ## test ContainerManagerImpl.destroyContainerImpl(self, container)
+    ## test ContainerManagerImpl.destroyContainerImpl(container)
     # @param self The object pointer
     def testDestroy(self):
         container = "c1"
@@ -238,28 +246,28 @@ class TestContainerManagerImpl(unittest.TestCase):
         self.__interface.sudo("ip link set " + bridge + " down")
         self.__interface.sudo("brctl delbr " + bridge)
 
-    ## test ContainerManagerImpl.__init__(host, user, password) fail because of docker service not running
+    ## test ContainerManagerImpl.__init__(host, user, password) fails because docker service is not running
     # @param self The object pointer
     def testFailInit(self):
         self.__interface.sudo("service docker stop")
         with self.assertRaises(RuntimeError):
             self.setUp()
         self.__interface.sudo("service docker start")
-    ## test ContainerManagerImpl.create(name) fail because docker service is not normally running
+    ## test ContainerManagerImpl.create(name) fails because docker service is not running
     # @param self The object pointer
-    def testFailCreateContainerDockerNotRunning(self):
+    def testFailCreate(self):
         self.__interface.sudo("service docker stop")
         with self.assertRaises(RuntimeError):
             self.__manager.create("c1")
         self.__interface.sudo("service docker start")
-    ## test ContainerManagerImpl.command(container, command) fail because the command does not exist
+    ## test ContainerManagerImpl.command(container, command) fails because the command does not exist
     # @param self The object pointer
     def testFailCommand(self):
         container = "c1"
         c = self.__manager.create(container)
         with self.assertRaises(RuntimeError):
             c.command("fail")
-    ## test ContainerManagerImpl.attachIP(container, segment, dev, IP) fail bacause the same dev is already created
+    ## test ContainerManagerImpl.attachIP(container, segment, dev, IP) fails bacause the same dev is already attached
     # @param self The object pointer
     def testFailAttachIP(self):
         bridge = "br1"

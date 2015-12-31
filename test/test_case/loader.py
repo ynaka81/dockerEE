@@ -1,10 +1,13 @@
-import unittest
 import sys
 sys.path.append("../../")
+
+import unittest
 import re
-from dockerEE.loader import *
+
 from dockerEE.core import ContainerManagerImpl
 from dockerEE.host import HostManagerImpl
+from dockerEE.loader import *
+
 from docker_container_test_utils import DockerContainerTestUtils
 
 ## TestServerLoader
@@ -12,38 +15,38 @@ from docker_container_test_utils import DockerContainerTestUtils
 # The test case for ServerLoader
 class TestServerLoader(unittest.TestCase):
     ## init test case
+    # @param self The object pointer
     def setUp(self):
-        host = "localhost"
-        user = "vagrant"
-        password = "vagrant"
+        arg = {"host": "localhost", "user": "vagrant", "password": "vagrant"}
         ## container manager
-        self.__container_manager = ContainerManagerImpl(host, user, password)
+        self.__container_manager = ContainerManagerImpl(**arg)
         ## host manager
-        self.__host_manager = HostManagerImpl(host, user, password)
+        self.__host_manager = HostManagerImpl(**arg)
         ## test utils
-        self.__utils = DockerContainerTestUtils(host, user, password)
+        self.__utils = DockerContainerTestUtils(**arg)
     ## test ServerLoader.__call__(self.__manager, parameter)
+    # @param self The object pointer
     def testCall(self):
-        parameter = [{"name": "c1", "image": "centos"}, {"name": "c2", "image": "centos"}]
+        parameter = [{"name": "s1", "image": "local/centos"}, {"name": "s2", "image": "local/centos"}]
         servers = ServerLoader()(self.__container_manager, self.__host_manager, parameter)
         for p in parameter:
-            self.assertTrue(p["name"] in servers)
+            self.assertIn(p["name"], servers)
             ret = servers[p["name"]].command("uname -n")
             self.assertEqual(ret.stdout, p["name"])
     ## test ServerLoader.__call__(self.__manager, parameter) with IPs
+    # @param self The object pointer
     def testCallWithIPs(self):
-        parameter = [{"name": "c1", "image": "centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.1", "gw": "192.168.0.254"}]}, {"name": "c2", "image": "centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.2"}, {"dev": "eth1", "IP": "192.168.1.2", "gw": "192.168.1.254"}]}]
+        parameter = [{"name": "s1", "image": "local/centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.1", "gw": "192.168.0.254"}]}, {"name": "s2", "image": "local/centos", "IPs": [{"dev": "eth0", "IP": "192.168.0.2"}, {"dev": "eth1", "IP": "192.168.1.2", "gw": "192.168.1.254"}]}]
         servers = ServerLoader()(self.__container_manager, self.__host_manager, parameter)
         for p in parameter:
-            self.assertTrue(p["name"] in servers)
+            self.assertIn(p["name"], servers)
             server = servers[p["name"]]
-            ret = servers[p["name"]].command("uname -n")
-            self.assertEqual(ret.stdout, p["name"])
+            ret = server.command("ip addr show")
             for n in p["IPs"]:
-                ret = server.command("ip addr show")
                 self.assertTrue(re.search(r"inet " + n["IP"] + ".*" + n["dev"], ret.stdout))
+            ret = server.command("ip route show")
+            for n in p["IPs"]:
                 if "gw" in n:
-                    ret = server.command("ip route show")
                     self.assertIn("default via " + n["gw"] + " dev " + n["dev"], ret.stdout)
 
 if __name__ == "__main__":

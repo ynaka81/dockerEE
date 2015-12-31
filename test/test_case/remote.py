@@ -1,6 +1,8 @@
-import unittest
 import sys
 sys.path.append("../../")
+
+import unittest
+
 from dockerEE.remote import RemoteInterfaceImpl
 
 ## TestRemoteInterfaceInmpl
@@ -9,8 +11,9 @@ from dockerEE.remote import RemoteInterfaceImpl
 class TestRemoteInterfaceInmpl(unittest.TestCase):
     ## init test case
     def setUp(self):
+        arg = {"host": "localhost", "user": "vagrant", "password": "vagrant"}
         ## remote_interface
-        self.__interface = RemoteInterfaceImpl("localhost", "vagrant", "vagrant")
+        self.__interface = RemoteInterfaceImpl(**arg)
     ## test RemoteInterfaceImpl.sudo(command)
     # @param self The object pointer
     def testSudo(self):

@@ -1,11 +1,14 @@
-import unittest
-from ipaddress import ip_interface
 import sys
 sys.path.append("/vagrant/dockerEE/host")
-from host_manager import HostManager
 sys.path.append("../../")
+
+import unittest
+from ipaddress import ip_interface
+
 from dockerEE.remote import RemoteInterfaceImpl
 from dockerEE.host import HostManagerImpl
+
+from host_manager import HostManager
 
 ## HostManagerStub
 #
@@ -36,6 +39,7 @@ class HostManagerStub(HostManager):
 # The test case for HostManager
 class TestHostManager(unittest.TestCase):
     ## init test case
+    # @param self The object pointer
     def setUp(self):
         ## host OS manager
         self.__manager = HostManagerStub()
@@ -76,20 +80,19 @@ class TestHostManager(unittest.TestCase):
 # The test case for HostManagerImpl
 class TestHostManagerImpl(unittest.TestCase):
     ## init test case
+    # @param self The object pointer
     def setUp(self):
-        host = "localhost"
-        user = "vagrant"
-        password = "vagrant"
+        arg = {"host": "localhost", "user": "vagrant", "password": "vagrant"}
         ## remote interface
-        self.__interface = RemoteInterfaceImpl(host, user, password)
+        self.__interface = RemoteInterfaceImpl(**arg)
         ## host OS manager
-        self.__manager = HostManagerImpl(host, user, password)
+        self.__manager = HostManagerImpl(**arg)
     ## check if the bridge exists
     # @param self The object pointer
     # @param network_address The network address of the bridge
+    # @return Whether the bridge exists
     def __checkBridgeExist(self, network):
-        ret = self.__interface.sudo("ip addr show | grep br_" + str(network).split("/")[0], True)
-        return ret.rc == 0
+        return self.__interface.sudo("ip addr show | grep br_" + str(network).split("/")[0], True).rc == 0
     ## test HostManager.createBridge(network_address)
     # @param self The object pointer
     def testCreateBridge(self):

@@ -1,9 +1,11 @@
-import unittest
 import sys
 sys.path.append("../../")
-import time
-from service_test_utils import ServiceTestUtils
+
+import unittest
+
 from dockerEE.remote import RemoteInterfaceImpl
+
+from service_test_utils import ServiceTestUtils
 
 ## TestEnvironmentEmulationRunner
 #
@@ -12,10 +14,11 @@ class TestEnvironmentEmulationRunner(unittest.TestCase):
     ## init test case
     # @param self The object pointer
     def setUp(self):
+        arg = {"host": "localhost", "user": "vagrant", "password": "vagrant"}
         ## stub file
         self.__stub = "service_environment_emulation_runner_stub.py"
         ## service test utils
-        self.__service = ServiceTestUtils("python /vagrant/test/test_case/" + self.__stub, "localhost", "vagrant", "vagrant")
+        self.__service = ServiceTestUtils("python /vagrant/test/test_case/" + self.__stub, **arg)
         ## starting file name
         self.__filename = "/tmp/service_environment_emulation_runner"
         open(self.__filename, "w")
@@ -26,6 +29,7 @@ class TestEnvironmentEmulationRunner(unittest.TestCase):
         self.assertIn("usage: " + self.__stub + " " + "|".join({"start":None, "stop":None, "restart":None, "status":None, "reload":None}.keys()), ret.stdout)
         self.assertIn("options:", ret.stdout)
     ## test "python service.py start"
+    # @param self The object pointer
     def testStart(self):
         ret = self.__service.start(self.__filename)
         self.assertEqual(ret.rc, 0)

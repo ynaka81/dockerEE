@@ -1,7 +1,8 @@
 import sys
 sys.path.append("/vagrant/dockerEE/service")
+
 import os
-import time
+
 from environment_emulation_runner import EnvironmentEmulationRunner
 from service_daemon import ServiceDaemon
 
@@ -12,17 +13,16 @@ class TestService(ServiceDaemon):
     ## constructor
     def __init__(self):
         ServiceDaemon.__init__(self, "~/.dockerEE/test_service_service_daemon.pid")
-        ## check file whether destrustor is called
-        self.__check_destructor_file = file(os.path.expanduser("~/.dockerEE/test_service_service_daemon.check_destructor"), "w")
+        ## check counter for _getInstance
+        self.__counter = None
         ## check file whether _delApp is called
-        self.__check_del_app_file = file(os.path.expanduser("~/.dockerEE/test_service_service_daemon.check_delApp"), "w")
-    ## destrustor
-    def __del__(self):
-        os.remove(self.__check_destructor_file.name)
+        self.__check_del_app_file = None
     ## the implementation of application specific initialization before service loop
     # @param self The object pointer
     def _initApp(self):
+        # initialize check variable
         self.__counter = 0
+        self.__check_del_app_file = file(os.path.expanduser("~/.dockerEE/test_service_service_daemon.check"), "w")
     ## the implementation of application specific destruction before service stop
     # @param self The object pointer
     def _delApp(self):
