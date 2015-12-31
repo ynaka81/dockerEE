@@ -179,7 +179,7 @@ class TestContainerManagerImpl(unittest.TestCase):
     def testCreateWithPrivilege(self):
         container = "c1"
         c = self.__manager.create(container, privilege=["NET_ADMIN", "SYS_ADMIN"])
-        ret = self.__interface.sudo("docker exec -it " + container + " umount /etc/hosts")
+        ret = self.__interface.sudo("docker exec -i " + container + " umount /etc/hosts")
         self.assertEqual(ret.rc, 0)
     ## test ContainerManagerImpl.create(name, hosts)
     # @param self The object pointer
@@ -187,12 +187,8 @@ class TestContainerManagerImpl(unittest.TestCase):
         container = "c1"
         hosts = [{"name": "c1", "IP": "1.0.1.10"}, {"name": "c2", "IP": "1.0.1.11"}]
         c = self.__manager.create(container, hosts=hosts)
-        # loop until the stdout is correctly gotten, maybe it maybe depends on docker bug?
-        for i in range(10):
-            ret = self.__interface.sudo("docker exec -it " + container + " cat /etc/hosts")
-            container_hosts = ret.stdout.splitlines()[-len(hosts) - 1::2]
-            if len(hosts) == len(container_hosts):
-                break
+        ret = self.__interface.sudo("docker exec -i " + container + " cat /etc/hosts")
+        container_hosts = ret.stdout.splitlines()[-len(hosts):]
         for i in range(len(hosts)):
             container_host = container_hosts[i].split()
             host = hosts[i]

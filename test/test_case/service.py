@@ -58,10 +58,10 @@ class TestEnvironmentEmulationService(unittest.TestCase):
         self.assertTrue(self.__utils.checkContainerExist(servers))
         for p in self.__parameter["servers"]:
             for n in p["IPs"]:
-                ret = self.__interface.sudo("docker exec -it " + p["name"] + " ip addr show")
+                ret = self.__interface.sudo("docker exec -i " + p["name"] + " ip addr show")
                 self.assertTrue(re.search(r"inet " + n["IP"] + ".*" + n["dev"], ret.stdout))
                 if "gw" in n:
-                    ret = self.__interface.sudo("docker exec -it " + p["name"] + " ip route show")
+                    ret = self.__interface.sudo("docker exec -i " + p["name"] + " ip route show")
                     self.assertIn("default via " + n["gw"].split("/")[0] + " dev " + n["dev"], ret.stdout)
         self.__service.stop(10)
         self.assertTrue(self.__utils.checkContainerNotExist(servers))
@@ -91,21 +91,21 @@ class TestEnvironmentEmulationService(unittest.TestCase):
         servers = [x["name"] for x in self.__parameter["servers"]]
         self.__service.start(self.__filename, 10)
         for s in servers:
-            self.__interface.sudo("docker exec -it " + s + " touch /tmp/hello_dockerEE")
+            self.__interface.sudo("docker exec -i " + s + " touch /tmp/hello_dockerEE")
         for s in servers:
-            ret = self.__interface.sudo("docker exec -it " + s + " test -f /tmp/hello_dockerEE", True)
+            ret = self.__interface.sudo("docker exec -i " + s + " test -f /tmp/hello_dockerEE", True)
             self.assertEqual(ret.rc, 0)
         self.__service.reload(servers[1:])
-        ret = self.__interface.sudo("docker exec -it " + servers[0] + " test -f /tmp/hello_dockerEE", True)
+        ret = self.__interface.sudo("docker exec -i " + servers[0] + " test -f /tmp/hello_dockerEE", True)
         self.assertEqual(ret.rc, 0)
-        ret = self.__interface.sudo("docker exec -it " + servers[1] + " test -f /tmp/hello_dockerEE", True)
+        ret = self.__interface.sudo("docker exec -i " + servers[1] + " test -f /tmp/hello_dockerEE", True)
         self.assertEqual(ret.rc, 1)
         for p in self.__parameter["servers"]:
             for n in p["IPs"]:
-                ret = self.__interface.sudo("docker exec -it " + p["name"] + " ip addr show")
+                ret = self.__interface.sudo("docker exec -i " + p["name"] + " ip addr show")
                 self.assertTrue(re.search(r"inet " + n["IP"] + ".*" + n["dev"], ret.stdout))
                 if "gw" in n:
-                    ret = self.__interface.sudo("docker exec -it " + p["name"] + " ip route show")
+                    ret = self.__interface.sudo("docker exec -i " + p["name"] + " ip route show")
                     self.assertIn("default via " + n["gw"].split("/")[0] + " dev " + n["dev"], ret.stdout)
         self.__service.stop(10)
 
